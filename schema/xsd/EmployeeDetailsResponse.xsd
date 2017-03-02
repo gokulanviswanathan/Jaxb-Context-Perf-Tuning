@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	attributeFormDefault="unqualified" elementFormDefault="unqualified">
+
+	<xsd:element name="employee-response">
+		<xsd:complexType>
+			
+			<xsd:sequence>
+				<xsd:element maxOccurs="1" minOccurs="0" name="employee-salary" type="employee-salary" />
+			</xsd:sequence>
+			<xsd:attribute name="name" type="xsd:string" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="employee-salary">
+		<xsd:sequence>
+			<xsd:element maxOccurs="1" minOccurs="0" name="id" type="xsd:string" />
+			<xsd:element maxOccurs="1" minOccurs="0" name="earnings-total" type="xsd:string" />
+			<xsd:element maxOccurs="1" minOccurs="0" name="deductions" type="deductions" />
+			<xsd:element maxOccurs="1" minOccurs="0" name="total-payout" type="xsd:string" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+		<xsd:complexType name="deductions">
+		<xsd:sequence minOccurs="0">
+			<xsd:element maxOccurs="1" minOccurs="0" name="facilities" type="xsd:string" />
+			<xsd:element maxOccurs="1" minOccurs="0" name="tax" type="xsd:string" />
+			<xsd:element maxOccurs="1" minOccurs="0" name="deductions-total" type="xsd:string" />
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

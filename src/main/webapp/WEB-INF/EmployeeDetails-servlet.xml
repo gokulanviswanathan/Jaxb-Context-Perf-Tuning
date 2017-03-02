@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+ http://www.springframework.org/schema/mvc
+ http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+ 	<context:component-scan base-package="com.infosys.employeedetails.services" />
+     
+     <!-- <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" /> -->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    	<property name="prefix" value="/WEB-INF/jsp/" />
+    	<property name="suffix" value=".jsp" />
+    </bean>
+
+	<bean id="employeeDetailsService" class="com.employeedetails.services.EmployeeDetail"
+		scope="prototype">
+		<constructor-arg ref="jaxbContext" />
+	</bean>
+
+	<bean id="jaxbContext" class="javax.xml.bind.JAXBContext"
+		factory-method="newInstance">
+		<constructor-arg>
+			<list>
+				<value type="java.lang.Class">com.employeedetails.jaxb.request.EmployeeDetails
+				</value>
+				<value type="java.lang.Class">com.employeedetails.jaxb.response.EmployeeResponse
+				</value>
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<!-- <bean id="employeeUserInterface" class="com.infosys.employeedetails.services.EmployeeUserInterface">
+	</bean> -->
+</beans>

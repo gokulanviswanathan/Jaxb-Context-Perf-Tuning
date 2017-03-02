@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.shc.retailservices.tests</groupId>
+	<artifactId>RegisterServicesJMetersTests</artifactId>
+	<version>1.0.0</version>
+	<packaging>jar</packaging>
+	<name>RegisterServices JMeter Tests</name>
+	<description>
+        Below is the maven build to run integration tests through jmeter test scripts and sends 
+        the test reports automatically via email. (SG-91706)
+    </description>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			
+			<!-- Plugin to make the jmeter execution to wait in queue for 15 seconds -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<configuration>
+					<tasks>
+						<echo>Waiting for server to ramp up</echo>
+						<sleep seconds="15" />
+						<echo>Wait over.. </echo>
+						<echo>Duration: 15 seconds</echo>
+					</tasks>
+				</configuration>
+				
+				<executions>
+					<execution>
+						<id>sleep-for-a-while</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Plugin to stop compiling the classes -->
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <id>default-compile</id>
+	                    <phase>none</phase>
+	                </execution>
+	            </executions>
+	        </plugin>
+		
+			<!-- Plugin to stop copying the resources -->
+			<plugin>
+		      	<groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-resources-plugin</artifactId>
+		       	<executions>
+		    	  	 <execution>
+		           		<id>default-resources</id>
+		           		<phase>none</phase>
+		             </execution>
+		      	</executions>
+		    </plugin>
+			
+			<!-- Plugin to execute jmeter test scripts -->
+			<plugin>
+				<groupId>com.lazerycode.jmeter</groupId>
+				<artifactId>jmeter-maven-plugin</artifactId>
+				<version>1.9.0</version>
+				
+				<configuration>
+					<testFilesDirectory>${project.basedir}/src/test/jmeter/scripts</testFilesDirectory>
+					<testResultsTimestamp>false</testResultsTimestamp>
+					<overrideRootLogLevel>DEBUG</overrideRootLogLevel>
+					<suppressJMeterOutput>false</suppressJMeterOutput>
+					<ignoreResultFailures>true</ignoreResultFailures>
+					<propertiesJMeter>
+						<jmeter.save.saveservice.thread_counts>true</jmeter.save.saveservice.thread_counts>
+						<jmeter.save.saveservice.output_format>xml</jmeter.save.saveservice.output_format>
+
+					</propertiesJMeter>
+					<jmeterPlugins>
+						<plugin>
+							<groupId>kg.apc</groupId>
+							<artifactId>jmeter-plugins</artifactId>
+						</plugin>
+					</jmeterPlugins>
+				</configuration>
+				
+				<executions>
+					<execution>
+						<id>execute-jmeter-tests</id>
+						<goals>
+							<goal>jmeter</goal>
+						</goals>
+						<phase>integration-test</phase>
+					</execution>
+				</executions>
+				
+				<dependencies>
+					<dependency>
+						<groupId>kg.apc</groupId>
+						<artifactId>jmeter-plugins</artifactId>
+						<version>1.0.0</version>
+						
+						<exclusions>
+							<exclusion>
+								<groupId>kg.apc</groupId>
+								<artifactId>perfmon</artifactId>
+							</exclusion>
+							
+							<exclusion>
+								<groupId>org.apache.hadoop</groupId>
+								<artifactId>hadoop-core</artifactId>
+							</exclusion>
+							
+							<exclusion>
+								<groupId>org.apache.hbase</groupId>
+								<artifactId>hbase</artifactId>
+							</exclusion>
+
+							<exclusion>
+								<groupId>org.apache.jmeter</groupId>
+								<artifactId>jorphan</artifactId>
+							</exclusion>
+							
+							<exclusion>
+								<groupId>org.apache.bsf</groupId>
+								<artifactId>bsf-api</artifactId>
+							</exclusion>
+							
+							<exclusion>
+								<groupId>org.bouncycastle</groupId>
+								<artifactId>bcmail-jdk15</artifactId>
+							</exclusion>
+							
+							<exclusion>
+								<groupId>org.bouncycastle</groupId>
+								<artifactId>bcprov-jdk15</artifactId>
+							</exclusion>
+							
+							<exclusion>
+								<groupId>javax.activation</groupId>
+								<artifactId>activation</artifactId>
+							</exclusion>
+							
+							<exclusion>
+								<groupId>commons-logging</groupId>
+								<artifactId>commons-logging</artifactId>
+							</exclusion>
+						</exclusions>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<!-- Plugin to transform .jtl file to .html through xsl template -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>xml-maven-plugin</artifactId>
+				<version>1.0</version>
+				
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<goal>transform</goal>
+						</goals>
+					</execution>
+				</executions>
+				
+				<configuration>
+					<transformationSets>
+						<transformationSet>
+							<dir>${project.build.directory}/jmeter/results</dir>
+							<stylesheet>${project.basedir}/src/test/jmeter/templates/jmeter-results-report.xsl</stylesheet>
+							<outputDir>${project.basedir}/src/test/jmeter/results</outputDir>
+							<fileMappers>
+								<fileMapper
+									implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
+									<pattern>(.*?)\s(.*?)</pattern>
+									<replacement>$1$2</replacement>
+									<replaceAll>true</replaceAll>
+								</fileMapper>
+								<fileMapper
+									implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+									<targetExtension>.html</targetExtension>
+								</fileMapper>
+							</fileMappers>
+						</transformationSet>
+					</transformationSets>
+				</configuration>
+			</plugin>
+
+			<!-- Plugin to send the test reports via email -->
+			<plugin>
+				<groupId>ch.fortysix</groupId>
+				<artifactId>maven-postman-plugin</artifactId>
+				<version>0.1.6</version>
+				
+				<executions>
+					<execution>
+						<id>send a mail</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>send-mail</goal>
+						</goals>
+						<inherited>false</inherited>
+						
+						<configuration>
+							<from>abc@xyz.com</from>
+							<subject>Test</subject>
+							<failonerror>true</failonerror>
+							<mailhost>smtp.abc.com</mailhost>
+							<mailport>25</mailport>
+							<mailAltConfig>true</mailAltConfig>
+							<htmlMessageFile>${project.basedir}/src/test/jmeter/results/abc.html</htmlMessageFile>
+							<receivers>
+								<receiver>abc@xyz.com</receiver> 
+							</receivers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
